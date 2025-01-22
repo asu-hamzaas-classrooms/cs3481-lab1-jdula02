@@ -43,7 +43,12 @@
 */
 uint64_t Tools::buildLong(uint8_t bytes[LONGSIZE])
 {
-  return 0;
+  uint64_t longValue= 0;
+  for(int i = 0; i < LONGSIZE; i++)
+  {
+    longValue = (longValue << LONGSIZE) | bytes[LONGSIZE - i - 1];
+  }
+  return longValue;
 }
 
 /** 
@@ -67,8 +72,12 @@ uint64_t Tools::buildLong(uint8_t bytes[LONGSIZE])
 */
 uint64_t Tools::getByte(uint64_t source, int32_t byteNum)
 {
-  return 0;
-}
+  if(byteNum < 0 || byteNum >= 8)
+  {
+    return 0;
+  }
+  return (source >> (byteNum * 8)) & 0xFF;
+} 
 
 /**
  * accepts as input an uint64_t and returns the bits low through 
@@ -97,7 +106,11 @@ uint64_t Tools::getByte(uint64_t source, int32_t byteNum)
  */
 uint64_t Tools::getBits(uint64_t source, int32_t low, int32_t high)
 {
-  return 0;
+  if(low > high || low < 0 || high > 63)
+  {
+    return 0;
+  }
+  return (source << (63 - high)) >> (63 - high + low);
 }
 
 
@@ -125,7 +138,13 @@ uint64_t Tools::getBits(uint64_t source, int32_t low, int32_t high)
  */
 uint64_t Tools::setBits(uint64_t source, int32_t low, int32_t high)
 {
-  return 0;
+ if(low > high || low < 0 || high > 63)
+  {
+    return source;
+  }
+    uint64_t negOne = 0xffffffffffffffff;
+    return source | (getBits(negOne, low, high) << low);
+
 }
 
 /**
@@ -150,7 +169,12 @@ uint64_t Tools::setBits(uint64_t source, int32_t low, int32_t high)
  */
 uint64_t Tools::clearBits(uint64_t source, int32_t low, int32_t high)
 {
-  return 0;
+  if(low > high || low < 0 || high > 63)
+  {
+    return source;
+  }
+  return source ^ (getBits(source, low, high) << low);
+  
 }
 
 
@@ -206,6 +230,10 @@ uint64_t Tools::copyBits(uint64_t source, uint64_t dest,
  */
 uint64_t Tools::setByte(uint64_t source, int32_t byteNum)
 {
+  if(byteNum >= 0 || byteNum <= 7)
+  {
+    return 0;
+  } 
   return 0;
 }
 
@@ -228,7 +256,7 @@ uint64_t Tools::setByte(uint64_t source, int32_t byteNum)
  */
 uint64_t Tools::sign(uint64_t source)
 {
-  return 0;
+  return source >> 63;
 }
 
 /**
@@ -258,7 +286,8 @@ bool Tools::addOverflow(uint64_t op1, uint64_t op2)
   //      Thus, the way to check for an overflow is to compare the signs of the
   //      operand and the result.  For example, if you add two positive numbers, 
   //      the result should be positive, otherwise an overflow occurred.
-  return false;
+  uint64_t sum = op1 + op2;
+  return (sign(op1) == sign(op2)) && (sign(op1) != sign(sum));
 }
 
 /**
@@ -287,5 +316,5 @@ bool Tools::subOverflow(uint64_t op1, uint64_t op2)
   //Note: you can not simply use addOverflow in this function.  If you negate
   //op1 in order to an add, you may get an overflow. 
   //NOTE: the subtraction is op2 - op1 (not op1 - op2).
-  return false;
+  return (sign(op2) != sign(op2 - op1)) && (sign(op2) != sign(op1));
 }
