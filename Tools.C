@@ -205,7 +205,20 @@ uint64_t Tools::clearBits(uint64_t source, int32_t low, int32_t high)
 uint64_t Tools::copyBits(uint64_t source, uint64_t dest, 
                          int32_t srclow, int32_t dstlow, int32_t length)
 {
-   return 0; 
+  uint64_t desthigh = dstlow + length - 1;
+  uint64_t srchigh = srclow + length - 1;
+  if(srclow < 0 || srclow > 63 || dstlow > 63 || dstlow < 0 || desthigh > 63 || desthigh < 0
+  || srchigh > 63 || srchigh < 0)
+  {
+    return dest; //shits fucked
+  }
+  uint64_t bits = getBits(source, srclow, srchigh);
+  uint64_t shiftdashit = bits << dstlow;
+  uint64_t destbits = getBits(dest, dstlow, desthigh);
+  uint64_t shifttwo = destbits << dstlow;
+  uint64_t clearBits = dest ^ shifttwo;
+  return shiftdashit | clearBits;
+  
 }
 
 
@@ -230,11 +243,12 @@ uint64_t Tools::copyBits(uint64_t source, uint64_t dest,
  */
 uint64_t Tools::setByte(uint64_t source, int32_t byteNum)
 {
-  if(byteNum >= 0 || byteNum <= 7)
+  if(byteNum >= 0 && byteNum <= 7)
   {
-    return 0;
+    uint64_t mask = 0xFF;
+    return source | (mask << (byteNum * 8));
   } 
-  return 0;
+  return source;
 }
 
 
